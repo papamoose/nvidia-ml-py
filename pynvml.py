@@ -1398,14 +1398,14 @@ def nvmlSystemGetProcessName(pid):
     fn = _nvmlGetFunctionPointer("nvmlSystemGetProcessName")
     ret = fn(c_uint(pid), c_name, c_uint(1024))
     _nvmlCheckReturn(ret)
-    return c_name.value
+    return c_name.value.decode('utf-8')
 
 def nvmlSystemGetDriverVersion():
     c_version = create_string_buffer(NVML_SYSTEM_DRIVER_VERSION_BUFFER_SIZE)
     fn = _nvmlGetFunctionPointer("nvmlSystemGetDriverVersion")
     ret = fn(c_version, c_uint(NVML_SYSTEM_DRIVER_VERSION_BUFFER_SIZE))
     _nvmlCheckReturn(ret)
-    return c_version.value
+    return c_version.value.decode('utf-8')
 
 # Added in 2.285
 def nvmlSystemGetHicVersion():
@@ -1554,7 +1554,7 @@ def nvmlDeviceGetBoardId(handle):
     fn = _nvmlGetFunctionPointer("nvmlDeviceGetBoardId")
     ret = fn(handle, byref(c_id))
     _nvmlCheckReturn(ret)
-    return c_id.value
+    return c_id.value.decode('utf-8')
 
 def nvmlDeviceGetMultiGpuBoard(handle):
     c_multiGpu = c_uint();

@@ -129,7 +129,7 @@ def XmlDeviceQuery():
 
             pciInfo = nvmlDeviceGetPciInfo(handle)
 
-            strResult += '  <gpu id="%s">\n' % pciInfo.busId
+            strResult += '  <gpu id="%s">\n' % pciInfo.busId.decode('utf-8')
 
             strResult += '    <product_name>' + nvmlDeviceGetName(handle) + '</product_name>\n'
 
@@ -220,7 +220,7 @@ def XmlDeviceQuery():
             strResult += '      <pci_domain>%04X</pci_domain>\n' % pciInfo.domain
             strResult += '      <pci_device_id>%08X</pci_device_id>\n' % (pciInfo.pciDeviceId)
             strResult += '      <pci_sub_system_id>%08X</pci_sub_system_id>\n' % (pciInfo.pciSubSystemId)
-            strResult += '      <pci_bus_id>' + str(pciInfo.busId) + '</pci_bus_id>\n'
+            strResult += '      <pci_bus_id>' + pciInfo.busId.decode('utf-8') + '</pci_bus_id>\n'
             strResult += '      <pci_gpu_link_info>\n'
 
 
