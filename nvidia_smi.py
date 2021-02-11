@@ -45,6 +45,11 @@
 
 from pynvml import *
 import datetime
+from xml.dom.minidom import parseString
+import json
+
+# We should vendor this dependency
+from dicttoxml import dicttoxml
 
 #
 # Helper functions
@@ -149,64 +154,64 @@ def JsonDeviceQuery():
       handle = nvmlDeviceGetHandleByIndex(i)
       pciInfo = nvmlDeviceGetPciInfo(handle)
 
-      nvml_log['gpus'][i] = {}
+      nvml_log['gpus']["gpu%s" % i] = {}
 
-      nvml_log['gpus'][i]['busId'] = pciInfo.busId.decode('utf-8')
-      nvml_log['gpus'][i]['product_name'] = nvmlDeviceGetName(handle)
+      nvml_log['gpus']["gpu%s" % i]['busId'] = pciInfo.busId.decode('utf-8')
+      nvml_log['gpus']["gpu%s" % i]['product_name'] = nvmlDeviceGetName(handle)
 
       try:
         state = ('Enabled' if (nvmlDeviceGetDisplayMode(handle) != 0) else 'Disabled')
       except NVMLError as err:
         state = handleError(err)
-      nvml_log['gpus'][i]['display_mode'] = state
+      nvml_log['gpus']["gpu%s" % i]['display_mode'] = state
 
       try:
         mode = 'Enabled' if (nvmlDeviceGetPersistenceMode(handle) != 0) else 'Disabled'
       except NVMLError as err:
         mode = handleError(err)
-      nvml_log['gpus'][i]['persistence_mode'] = mode
+      nvml_log['gpus']["gpu%s" % i]['persistence_mode'] = mode
 
-      nvml_log['gpus'][i]['driver_model'] = {}
+      nvml_log['gpus']["gpu%s" % i]['driver_model'] = {}
 
       try:
         current = str(nvmlDeviceGetCurrentDriverModel(handle))
       except NVMLError as err:
         current = handleError(err)
-      nvml_log['gpus'][i]['driver_model']['current_dm'] = current
+      nvml_log['gpus']["gpu%s" % i]['driver_model']['current_dm'] = current
 
       try:
         pending = str(nvmlDeviceGetPendingDriverModel(handle))
       except NVMLError as err:
         pending = handleError(err)
-      nvml_log['gpus'][i]['driver_model']['pending_dm'] = pending
+      nvml_log['gpus']["gpu%s" % i]['driver_model']['pending_dm'] = pending
 
       try:
         serial = nvmlDeviceGetSerial(handle)
       except NVMLError as err:
         serial = handleError(err)
-      nvml_log['gpus'][i]['serial'] = serial
+      nvml_log['gpus']["gpu%s" % i]['serial'] = serial
 
       try:
         uuid = nvmlDeviceGetUUID(handle)
       except NVMLError as err:
         uuid = handleError(err)
-      nvml_log['gpus'][i]['uuid'] = uuid
+      nvml_log['gpus']["gpu%s" % i]['uuid'] = uuid
 
       try:
         vbios = nvmlDeviceGetVbiosVersion(handle)
       except NVMLError as err:
         vbios = handleError(err)
-      nvml_log['gpus'][i]['vbios_version'] = vbios
+      nvml_log['gpus']["gpu%s" % i]['vbios_version'] = vbios
 
 
-      nvml_log['gpus'][i]['inforom_version'] = {}
+      nvml_log['gpus']["gpu%s" % i]['inforom_version'] = {}
       try:
         oem = nvmlDeviceGetInforomVersion(handle, NVML_INFOROM_OEM)
         if oem == '':
           oem = 'N/A'
       except NVMLError as err:
         oem = handleError(err)
-      nvml_log['gpus'][i]['inforom_version']['oem_object'] = oem
+      nvml_log['gpus']["gpu%s" % i]['inforom_version']['oem_object'] = oem
 
       try:
         ecc = nvmlDeviceGetInforomVersion(handle, NVML_INFOROM_ECC)
@@ -214,7 +219,7 @@ def JsonDeviceQuery():
           ecc = 'N/A'
       except NVMLError as err:
         ecc = handleError(err)
-      nvml_log['gpus'][i]['inforom_version']['ecc'] = ecc
+      nvml_log['gpus']["gpu%s" % i]['inforom_version']['ecc'] = ecc
 
       try:
         pwr = nvmlDeviceGetInforomVersion(handle, NVML_INFOROM_POWER)
@@ -222,43 +227,43 @@ def JsonDeviceQuery():
           pwr = 'N/A'
       except NVMLError as err:
         pwr = handleError(err)
-      nvml_log['gpus'][i]['inforom_version']['pwr_object'] = pwr
+      nvml_log['gpus']["gpu%s" % i]['inforom_version']['pwr_object'] = pwr
 
 
       # PCI
-      nvml_log['gpus'][i]['pci'] = {}
-      nvml_log['gpus'][i]['pci']['pci_bus'] = pciInfo.bus
-      nvml_log['gpus'][i]['pci']['pci_device'] = pciInfo.device
-      nvml_log['gpus'][i]['pci']['pci_domain'] = pciInfo.domain
-      nvml_log['gpus'][i]['pci']['pci_device_id'] = pciInfo.pciDeviceId
-      nvml_log['gpus'][i]['pci']['pci_sub_system_id'] = pciInfo.pciSubSystemId
-      nvml_log['gpus'][i]['pci']['pci_bus_id'] = pciInfo.busId.decode('utf-8')
+      nvml_log['gpus']["gpu%s" % i]['pci'] = {}
+      nvml_log['gpus']["gpu%s" % i]['pci']['pci_bus'] = pciInfo.bus
+      nvml_log['gpus']["gpu%s" % i]['pci']['pci_device'] = pciInfo.device
+      nvml_log['gpus']["gpu%s" % i]['pci']['pci_domain'] = pciInfo.domain
+      nvml_log['gpus']["gpu%s" % i]['pci']['pci_device_id'] = pciInfo.pciDeviceId
+      nvml_log['gpus']["gpu%s" % i]['pci']['pci_sub_system_id'] = pciInfo.pciSubSystemId
+      nvml_log['gpus']["gpu%s" % i]['pci']['pci_bus_id'] = pciInfo.busId.decode('utf-8')
 
-      nvml_log['gpus'][i]['pci']['pcie_gen'] = {}
+      nvml_log['gpus']["gpu%s" % i]['pci']['pcie_gen'] = {}
       try:
         gen = str(nvmlDeviceGetMaxPcieLinkGeneration(handle))
       except NVMLError as err:
         gen = handleError(err)
-      nvml_log['gpus'][i]['pci']['pcie_gen']['max_link_gen'] = gen
+      nvml_log['gpus']["gpu%s" % i]['pci']['pcie_gen']['max_link_gen'] = gen
 
       try:
         gen = str(nvmlDeviceGetCurrPcieLinkGeneration(handle))
       except NVMLError as err:
         gen = handleError(err)
-      nvml_log['gpus'][i]['pci']['pcie_gen']['current_link_gen'] = gen
+      nvml_log['gpus']["gpu%s" % i]['pci']['pcie_gen']['current_link_gen'] = gen
 
-      nvml_log['gpus'][i]['pci']['link_widths'] = {}
+      nvml_log['gpus']["gpu%s" % i]['pci']['link_widths'] = {}
       try:
         width = str(nvmlDeviceGetMaxPcieLinkWidth(handle)) + 'x'
       except NVMLError as err:
         width = handleError(err)
-      nvml_log['gpus'][i]['pci']['link_widths']['max_link_width'] = width
+      nvml_log['gpus']["gpu%s" % i]['pci']['link_widths']['max_link_width'] = width
 
       try:
         width = str(nvmlDeviceGetCurrPcieLinkWidth(handle)) + 'x'
       except NVMLError as err:
         width = handleError(err)
-      nvml_log['gpus'][i]['pci']['link_widths']['current_link_width'] = width
+      nvml_log['gpus']["gpu%s" % i]['pci']['link_widths']['current_link_width'] = width
 
 
       # MEMORY
@@ -266,7 +271,7 @@ def JsonDeviceQuery():
         fan = str(nvmlDeviceGetFanSpeed(handle)) + ' %'
       except NVMLError as err:
         fan = handleError(err)
-      nvml_log['gpus'][i]['fan_speed'] = fan
+      nvml_log['gpus']["gpu%s" % i]['fan_speed'] = fan
 
       try:
         memInfo = nvmlDeviceGetMemoryInfo(handle)
@@ -279,10 +284,10 @@ def JsonDeviceQuery():
         mem_used = error
         mem_free = error
 
-      nvml_log['gpus'][i]['memory_usage'] = {}
-      nvml_log['gpus'][i]['memory_usage']['total'] = mem_total
-      nvml_log['gpus'][i]['memory_usage']['used'] = mem_used
-      nvml_log['gpus'][i]['memory_usage']['free'] = mem_free
+      nvml_log['gpus']["gpu%s" % i]['memory_usage'] = {}
+      nvml_log['gpus']["gpu%s" % i]['memory_usage']['total'] = mem_total
+      nvml_log['gpus']["gpu%s" % i]['memory_usage']['used'] = mem_used
+      nvml_log['gpus']["gpu%s" % i]['memory_usage']['free'] = mem_free
 
 
       try:
@@ -300,7 +305,7 @@ def JsonDeviceQuery():
       except NVMLError as err:
         modeStr = handleError(err)
 
-      nvml_log['gpus'][i]['compute_mode'] = modeStr
+      nvml_log['gpus']["gpu%s" % i]['compute_mode'] = modeStr
 
 
       # MEMORY UTILIZATION
@@ -313,9 +318,9 @@ def JsonDeviceQuery():
         gpu_util = error
         mem_util = error
 
-      nvml_log['gpus'][i]['utilization'] = {}
-      nvml_log['gpus'][i]['utilization']['gpu_util'] = gpu_util
-      nvml_log['gpus'][i]['utilization']['memory_util'] = mem_util
+      nvml_log['gpus']["gpu%s" % i]['utilization'] = {}
+      nvml_log['gpus']["gpu%s" % i]['utilization']['gpu_util'] = gpu_util
+      nvml_log['gpus']["gpu%s" % i]['utilization']['memory_util'] = mem_util
 
       # ECC
       try:
@@ -327,14 +332,14 @@ def JsonDeviceQuery():
         curr_str = error
         pend_str = error
 
-      nvml_log['gpus'][i]['ecc_mode'] = {}
-      nvml_log['gpus'][i]['ecc_mode']['current_ecc'] = curr_str
-      nvml_log['gpus'][i]['ecc_mode']['pending_ecc'] = pend_str
+      nvml_log['gpus']["gpu%s" % i]['ecc_mode'] = {}
+      nvml_log['gpus']["gpu%s" % i]['ecc_mode']['current_ecc'] = curr_str
+      nvml_log['gpus']["gpu%s" % i]['ecc_mode']['pending_ecc'] = pend_str
 
       # ECC ERRORS
-      nvml_log['gpus'][i]['ecc_errors'] = {}
-      nvml_log['gpus'][i]['ecc_errors']['volatile'] = {}
-      nvml_log['gpus'][i]['ecc_errors']['aggregate'] = {}
+      nvml_log['gpus']["gpu%s" % i]['ecc_errors'] = {}
+      nvml_log['gpus']["gpu%s" % i]['ecc_errors']['volatile'] = {}
+      nvml_log['gpus']["gpu%s" % i]['ecc_errors']['aggregate'] = {}
       # CounterType: NVML_VOLATILE_ECC, NVML_AGGREGATE_ECC
       # bitType: NVML_SINGLE_BIT_ECC, NVML_DOUBLE_BIT_ECC
       for countertype in [NVML_VOLATILE_ECC,NVML_AGGREGATE_ECC]:
@@ -343,16 +348,16 @@ def JsonDeviceQuery():
           d = DictGetEccByType(handle, countertype, bittype)
 
           if bittype == NVML_SINGLE_BIT_ECC and countertype == NVML_VOLATILE_ECC:
-            nvml_log['gpus'][i]['ecc_errors']['volatile']['single_bit'] = d
+            nvml_log['gpus']["gpu%s" % i]['ecc_errors']['volatile']['single_bit'] = d
 
           if bittype == NVML_SINGLE_BIT_ECC and countertype == NVML_AGGREGATE_ECC:
-            nvml_log['gpus'][i]['ecc_errors']['aggregate']['single_bit'] = d
+            nvml_log['gpus']["gpu%s" % i]['ecc_errors']['aggregate']['single_bit'] = d
 
           if bittype == NVML_DOUBLE_BIT_ECC and countertype == NVML_VOLATILE_ECC:
-            nvml_log['gpus'][i]['ecc_errors']['volatile']['double_bit'] = d
+            nvml_log['gpus']["gpu%s" % i]['ecc_errors']['volatile']['double_bit'] = d
 
           if bittype == NVML_DOUBLE_BIT_ECC and countertype == NVML_AGGREGATE_ECC:
-            nvml_log['gpus'][i]['ecc_errors']['aggregate']['double_bit'] = d
+            nvml_log['gpus']["gpu%s" % i]['ecc_errors']['aggregate']['double_bit'] = d
 
       # TEMPERATURE
       try:
@@ -360,80 +365,80 @@ def JsonDeviceQuery():
       except NVMLError as err:
         temp = handleError(err)
 
-      nvml_log['gpus'][i]['temperature'] = temp
+      nvml_log['gpus']["gpu%s" % i]['temperature'] = temp
 
       # POWER READINGS
-      nvml_log['gpus'][i]['power_readings'] = {}
+      nvml_log['gpus']["gpu%s" % i]['power_readings'] = {}
 
       try:
         perfState = nvmlDeviceGetPowerState(handle)
       except NVMLError as err:
         perfState = handleError(err)
-      nvml_log['gpus'][i]['power_readings']['power_state'] = perfState
+      nvml_log['gpus']["gpu%s" % i]['power_readings']['power_state'] = perfState
 
       try:
         powMan = nvmlDeviceGetPowerManagementMode(handle)
         powManStr = 'Supported' if powMan != 0 else 'N/A'
       except NVMLError as err:
         powManStr = handleError(err)
-      nvml_log['gpus'][i]['power_readings']['power_management'] = powManStr
+      nvml_log['gpus']["gpu%s" % i]['power_readings']['power_management'] = powManStr
 
       try:
         powDraw = (nvmlDeviceGetPowerUsage(handle) / 1000.0)
         powDrawStr = '%.2f W' % powDraw
       except NVMLError as err:
         powDrawStr = handleError(err)
-      nvml_log['gpus'][i]['power_readings']['power_draw'] = powDrawStr
+      nvml_log['gpus']["gpu%s" % i]['power_readings']['power_draw'] = powDrawStr
 
       try:
         powLimit = (nvmlDeviceGetPowerManagementLimit(handle) / 1000.0)
         powLimitStr = '%d W' % powLimit
       except NVMLError as err:
         powLimitStr = handleError(err)
-      nvml_log['gpus'][i]['power_readings']['power_limit'] = powLimitStr
+      nvml_log['gpus']["gpu%s" % i]['power_readings']['power_limit'] = powLimitStr
 
       # CLOCKS
-      nvml_log['gpus'][i]['clocks'] = {}
+      nvml_log['gpus']["gpu%s" % i]['clocks'] = {}
 
       try:
         graphics = str(nvmlDeviceGetClockInfo(handle, NVML_CLOCK_GRAPHICS))
       except NVMLError as err:
         graphics = handleError(err)
-      nvml_log['gpus'][i]['clocks']['graphics_clock'] = "%s MHz" % graphics
+      nvml_log['gpus']["gpu%s" % i]['clocks']['graphics_clock'] = "%s MHz" % graphics
 
       try:
         sm = str(nvmlDeviceGetClockInfo(handle, NVML_CLOCK_SM))
       except NVMLError as err:
         sm = handleError(err)
-      nvml_log['gpus'][i]['clocks']['sm_clock'] = "%s MHz" % sm
+      nvml_log['gpus']["gpu%s" % i]['clocks']['sm_clock'] = "%s MHz" % sm
 
       try:
         mem = str(nvmlDeviceGetClockInfo(handle, NVML_CLOCK_MEM))
       except NVMLError as err:
         mem = handleError(err)
-      nvml_log['gpus'][i]['clocks']['mem_clock'] = "%s MHz" % mem
+      nvml_log['gpus']["gpu%s" % i]['clocks']['mem_clock'] = "%s MHz" % mem
 
 
       # MAX CLOCKS
-      nvml_log['gpus'][i]['max_clocks'] = {}
+      nvml_log['gpus']["gpu%s" % i]['max_clocks'] = {}
 
       try:
         graphics = str(nvmlDeviceGetMaxClockInfo(handle, NVML_CLOCK_GRAPHICS))
       except NVMLError as err:
         graphics = handleError(err)
-      nvml_log['gpus'][i]['max_clocks']['graphics_clock'] = "%s MHz" % graphics
+      nvml_log['gpus']["gpu%s" % i]['max_clocks']['graphics_clock'] = "%s MHz" % graphics
 
       try:
         sm = str(nvmlDeviceGetMaxClockInfo(handle, NVML_CLOCK_SM))
       except NVMLError as err:
         sm = handleError(err)
-      nvml_log['gpus'][i]['max_clocks']['sm_clock'] = "%s MHz" % sm
+      nvml_log['gpus']["gpu%s" % i]['max_clocks']['sm_clock'] = "%s MHz" % sm
 
       try:
         mem = str(nvmlDeviceGetMaxClockInfo(handle, NVML_CLOCK_MEM))
       except NVMLError as err:
         mem = handleError(err)
-      nvml_log['gpus'][i]['max_clocks']['mem_clock'] = "%s MHz" % mem
+      nvml_log['gpus']["gpu%s" % i]['max_clocks']['mem_clock'] = "%s MHz" % mem
 
 
       # PERFORMANCE STATE
@@ -443,11 +448,11 @@ def JsonDeviceQuery():
       except NVMLError as err:
         perfStateStr = handleError(err)
 
-      nvml_log['gpus'][i]['performance_state'] = perfStateStr
+      nvml_log['gpus']["gpu%s" % i]['performance_state'] = perfStateStr
 
 
       # COMPUTE PROCESSES
-      nvml_log['gpus'][i]['compute_processes'] = {}
+      nvml_log['gpus']["gpu%s" % i]['compute_processes'] = {}
 
       try:
         procs = nvmlDeviceGetComputeRunningProcesses(handle)
@@ -456,8 +461,8 @@ def JsonDeviceQuery():
         procstr = handleError(err)
 
       for p in procs:
-        nvml_log['gpus'][i]['compute_processes']['process_info'] = {}
-        nvml_log['gpus'][i]['compute_processes']['process_info'][p.pid] = {}
+        nvml_log['gpus']["gpu%s" % i]['compute_processes']['process_info'] = {}
+        nvml_log['gpus']["gpu%s" % i]['compute_processes']['process_info'][p.pid] = {}
 
         try:
           name = str(nvmlSystemGetProcessName(p.pid))
@@ -467,13 +472,13 @@ def JsonDeviceQuery():
             continue
           else:
             name = handleError(err)
-            nvml_log['gpus'][i]['compute_processes']['process_info'][p.pid]['process_name'] = name
+            nvml_log['gpus']["gpu%s" % i]['compute_processes']['process_info'][p.pid]['process_name'] = name
 
             if (p.usedGpuMemory == None):
               used_gpu_mem += 'N\A'
             else:
               used_gpu_mem += '%d MB\n' % (p.usedGpuMemory / 1024 / 1024)
-            nvml_log['gpus'][i]['compute_processes']['process_info'][p.pid]['used_memory'] = used_gpu_mem
+            nvml_log['gpus']["gpu%s" % i]['compute_processes']['process_info'][p.pid]['used_memory'] = used_gpu_mem
 
 
   except NVMLError as err:
@@ -484,350 +489,12 @@ def JsonDeviceQuery():
   return nvml_log
 
 #######
+# This used to be the primary
 def XmlDeviceQuery():
+  d = []
+  g = JsonDeviceQuery()
+  d.append(g)
+  xml = dicttoxml(d, custom_root='nvidia_smi_log', attr_type=False).decode('utf-8')
+  dom = parseString(xml)
+  return dom.toprettyxml(indent="  ")
 
-    try:
-        #
-        # Initialize NVML
-        #
-        nvmlInit()
-        strResult = ''
-
-        strResult += '<?xml version="1.0" ?>\n'
-        strResult += '<!DOCTYPE nvidia_smi_log SYSTEM "nvsmi_device.dtd">\n'
-        strResult += '<nvidia_smi_log>\n'
-
-        strResult += '  <timestamp>' + str(datetime.date.today()) + '</timestamp>\n'
-        strResult += '  <driver_version>' + str(nvmlSystemGetDriverVersion()) + '</driver_version>\n'
-
-        deviceCount = nvmlDeviceGetCount()
-        strResult += '  <attached_gpus>' + str(deviceCount) + '</attached_gpus>\n'
-
-        for i in range(0, deviceCount):
-            handle = nvmlDeviceGetHandleByIndex(i)
-
-            pciInfo = nvmlDeviceGetPciInfo(handle)
-
-            strResult += '  <gpu id="%s">\n' % pciInfo.busId.decode('utf-8')
-
-            strResult += '    <product_name>' + nvmlDeviceGetName(handle) + '</product_name>\n'
-
-            try:
-                state = ('Enabled' if (nvmlDeviceGetDisplayMode(handle) != 0) else 'Disabled')
-            except NVMLError as err:
-                state = handleError(err)
-
-            strResult += '    <display_mode>' + state + '</display_mode>\n'
-
-            try:
-                mode = 'Enabled' if (nvmlDeviceGetPersistenceMode(handle) != 0) else 'Disabled'
-            except NVMLError as err:
-                mode = handleError(err)
-
-            strResult += '    <persistence_mode>' + mode + '</persistence_mode>\n'
-
-            strResult += '    <driver_model>\n'
-
-            try:
-                current = str(nvmlDeviceGetCurrentDriverModel(handle))
-            except NVMLError as err:
-                current = handleError(err)
-            strResult += '      <current_dm>' + current + '</current_dm>\n'
-
-            try:
-                pending = str(nvmlDeviceGetPendingDriverModel(handle))
-            except NVMLError as err:
-                pending = handleError(err)
-
-            strResult += '      <pending_dm>' + pending + '</pending_dm>\n'
-
-            strResult += '    </driver_model>\n'
-
-            try:
-                serial = nvmlDeviceGetSerial(handle)
-            except NVMLError as err:
-                serial = handleError(err)
-
-            strResult += '    <serial>' + serial + '</serial>\n'
-
-            try:
-                uuid = nvmlDeviceGetUUID(handle)
-            except NVMLError as err:
-                uuid = handleError(err)
-
-            strResult += '    <uuid>' + uuid + '</uuid>\n'
-
-            try:
-                vbios = nvmlDeviceGetVbiosVersion(handle)
-            except NVMLError as err:
-                vbios = handleError(err)
-
-            strResult += '    <vbios_version>' + vbios + '</vbios_version>\n'
-
-            strResult += '    <inforom_version>\n'
-
-            try:
-                oem = nvmlDeviceGetInforomVersion(handle, NVML_INFOROM_OEM)
-                if oem == '':
-                    oem = 'N/A'
-            except NVMLError as err:
-                oem = handleError(err)
-
-            strResult += '      <oem_object>' + oem + '</oem_object>\n'
-
-            try:
-                ecc = nvmlDeviceGetInforomVersion(handle, NVML_INFOROM_ECC)
-                if ecc == '':
-                    ecc = 'N/A'
-            except NVMLError as err:
-                ecc = handleError(err)
-
-            strResult += '      <ecc_object>' + ecc + '</ecc_object>\n'
-            try:
-                pwr = nvmlDeviceGetInforomVersion(handle, NVML_INFOROM_POWER)
-                if pwr == '':
-                    pwr = 'N/A'
-            except NVMLError as err:
-                pwr = handleError(err)
-
-            strResult += '      <pwr_object>' + pwr + '</pwr_object>\n'
-            strResult += '    </inforom_version>\n'
-
-            strResult += '    <pci>\n'
-            strResult += '      <pci_bus>%02X</pci_bus>\n' % pciInfo.bus
-            strResult += '      <pci_device>%02X</pci_device>\n' % pciInfo.device
-            strResult += '      <pci_domain>%04X</pci_domain>\n' % pciInfo.domain
-            strResult += '      <pci_device_id>%08X</pci_device_id>\n' % (pciInfo.pciDeviceId)
-            strResult += '      <pci_sub_system_id>%08X</pci_sub_system_id>\n' % (pciInfo.pciSubSystemId)
-            strResult += '      <pci_bus_id>' + pciInfo.busId.decode('utf-8') + '</pci_bus_id>\n'
-            strResult += '      <pci_gpu_link_info>\n'
-
-
-            strResult += '        <pcie_gen>\n'
-
-            try:
-                gen = str(nvmlDeviceGetMaxPcieLinkGeneration(handle))
-            except NVMLError as err:
-                gen = handleError(err)
-
-            strResult += '          <max_link_gen>' + gen + '</max_link_gen>\n'
-
-            try:
-                gen = str(nvmlDeviceGetCurrPcieLinkGeneration(handle))
-            except NVMLError as err:
-                gen = handleError(err)
-
-            strResult += '          <current_link_gen>' + gen + '</current_link_gen>\n'
-            strResult += '        </pcie_gen>\n'
-            strResult += '        <link_widths>\n'
-
-            try:
-                width = str(nvmlDeviceGetMaxPcieLinkWidth(handle)) + 'x'
-            except NVMLError as err:
-                width = handleError(err)
-
-            strResult += '          <max_link_width>' + width + '</max_link_width>\n'
-
-            try:
-                width = str(nvmlDeviceGetCurrPcieLinkWidth(handle)) + 'x'
-            except NVMLError as err:
-                width = handleError(err)
-
-            strResult += '          <current_link_width>' + width + '</current_link_width>\n'
-
-            strResult += '        </link_widths>\n'
-            strResult += '      </pci_gpu_link_info>\n'
-            strResult += '    </pci>\n'
-
-            try:
-                fan = str(nvmlDeviceGetFanSpeed(handle)) + ' %'
-            except NVMLError as err:
-                fan = handleError(err)
-            strResult += '    <fan_speed>' + fan + '</fan_speed>\n'
-
-            try:
-                memInfo = nvmlDeviceGetMemoryInfo(handle)
-                mem_total = str(memInfo.total / 1024 / 1024) + ' MB'
-                mem_used = str(memInfo.used / 1024 / 1024) + ' MB'
-                mem_free = str(memInfo.free / 1024 / 1024) + ' MB'
-            except NVMLError as err:
-                error = handleError(err)
-                mem_total = error
-                mem_used = error
-                mem_free = error
-
-            strResult += '    <memory_usage>\n'
-            strResult += '      <total>' + mem_total + '</total>\n'
-            strResult += '      <used>' + mem_used + '</used>\n'
-            strResult += '      <free>' + mem_free + '</free>\n'
-            strResult += '    </memory_usage>\n'
-
-
-            try:
-                mode = nvmlDeviceGetComputeMode(handle)
-                if mode == NVML_COMPUTEMODE_DEFAULT:
-                    modeStr = 'Default'
-                elif mode == NVML_COMPUTEMODE_EXCLUSIVE_THREAD:
-                    modeStr = 'Exclusive Thread'
-                elif mode == NVML_COMPUTEMODE_PROHIBITED:
-                    modeStr = 'Prohibited'
-                elif mode == NVML_COMPUTEMODE_EXCLUSIVE_PROCESS:
-                    modeStr = 'Exclusive Process'
-                else:
-                    modeStr = 'Unknown'
-            except NVMLError as err:
-                modeStr = handleError(err)
-
-            strResult += '    <compute_mode>' + modeStr + '</compute_mode>\n'
-
-            try:
-                util = nvmlDeviceGetUtilizationRates(handle)
-                gpu_util = str(util.gpu)
-                mem_util = str(util.memory)
-            except NVMLError as err:
-                error = handleError(err)
-                gpu_util = error
-                mem_util = error
-
-            strResult += '    <utilization>\n'
-            strResult += '      <gpu_util>' + gpu_util + ' %</gpu_util>\n'
-            strResult += '      <memory_util>' + mem_util + ' %</memory_util>\n'
-            strResult += '    </utilization>\n'
-
-            try:
-                (current, pending) = nvmlDeviceGetEccMode(handle)
-                curr_str = 'Enabled' if (current != 0) else 'Disabled'
-                pend_str = 'Enabled' if (pending != 0) else 'Disabled'
-            except NVMLError as err:
-                error = handleError(err)
-                curr_str = error
-                pend_str = error
-
-            strResult += '    <ecc_mode>\n'
-            strResult += '      <current_ecc>' + curr_str + '</current_ecc>\n'
-            strResult += '      <pending_ecc>' + pend_str + '</pending_ecc>\n'
-            strResult += '    </ecc_mode>\n'
-
-            strResult += '    <ecc_errors>\n'
-            strResult += GetEccStr(handle)
-            strResult += '    </ecc_errors>\n'
-
-            try:
-                temp = str(nvmlDeviceGetTemperature(handle, NVML_TEMPERATURE_GPU)) + ' C'
-            except NVMLError as err:
-                temp = handleError(err)
-
-            strResult += '    <temperature>\n'
-            strResult += '      <gpu_temp>' + temp + '</gpu_temp>\n'
-            strResult += '    </temperature>\n'
-
-            strResult += '    <power_readings>\n'
-            try:
-                perfState = nvmlDeviceGetPowerState(handle)
-            except NVMLError as err:
-                perfState = handleError(err)
-            strResult += '      <power_state>P%s</power_state>\n' % perfState
-            try:
-                powMan = nvmlDeviceGetPowerManagementMode(handle)
-                powManStr = 'Supported' if powMan != 0 else 'N/A'
-            except NVMLError as err:
-                powManStr = handleError(err)
-            strResult += '      <power_management>' + powManStr + '</power_management>\n'
-            try:
-                powDraw = (nvmlDeviceGetPowerUsage(handle) / 1000.0)
-                powDrawStr = '%.2f W' % powDraw
-            except NVMLError as err:
-                powDrawStr = handleError(err)
-            strResult += '      <power_draw>' + powDrawStr + '</power_draw>\n'
-            try:
-                powLimit = (nvmlDeviceGetPowerManagementLimit(handle) / 1000.0)
-                powLimitStr = '%d W' % powLimit
-            except NVMLError as err:
-                powLimitStr = handleError(err)
-            strResult += '      <power_limit>' + powLimitStr + '</power_limit>\n'
-            strResult += '    </power_readings>\n'
-
-            strResult += '    <clocks>\n'
-            try:
-                graphics = str(nvmlDeviceGetClockInfo(handle, NVML_CLOCK_GRAPHICS))
-            except NVMLError as err:
-                graphics = handleError(err)
-            strResult += '      <graphics_clock>' +graphics + ' MHz</graphics_clock>\n'
-            try:
-                sm = str(nvmlDeviceGetClockInfo(handle, NVML_CLOCK_SM))
-            except NVMLError as err:
-                sm = handleError(err)
-            strResult += '      <sm_clock>' + sm + ' MHz</sm_clock>\n'
-            try:
-                mem = str(nvmlDeviceGetClockInfo(handle, NVML_CLOCK_MEM))
-            except NVMLError as err:
-                mem = handleError(err)
-            strResult += '      <mem_clock>' + mem + ' MHz</mem_clock>\n'
-            strResult += '    </clocks>\n'
-
-            strResult += '    <max_clocks>\n'
-            try:
-                graphics = str(nvmlDeviceGetMaxClockInfo(handle, NVML_CLOCK_GRAPHICS))
-            except NVMLError as err:
-                graphics = handleError(err)
-            strResult += '      <graphics_clock>' + graphics + ' MHz</graphics_clock>\n'
-            try:
-                sm = str(nvmlDeviceGetMaxClockInfo(handle, NVML_CLOCK_SM))
-            except NVMLError as err:
-                sm = handleError(err)
-            strResult += '      <sm_clock>' + sm + ' MHz</sm_clock>\n'
-            try:
-                mem = str(nvmlDeviceGetMaxClockInfo(handle, NVML_CLOCK_MEM))
-            except NVMLError as err:
-                mem = handleError(err)
-            strResult += '      <mem_clock>' + mem + ' MHz</mem_clock>\n'
-            strResult += '    </max_clocks>\n'
-
-            try:
-                perfState = nvmlDeviceGetPowerState(handle)
-                perfStateStr = 'P%s' % perfState
-            except NVMLError as err:
-                perfStateStr = handleError(err)
-            strResult += '    <performance_state>' + perfStateStr + '</performance_state>\n'
-
-            strResult += '    <compute_processes>\n'
-
-            procstr = ""
-            try:
-                procs = nvmlDeviceGetComputeRunningProcesses(handle)
-            except NVMLError as err:
-                procs = []
-                procstr = handleError(err)
-
-            for p in procs:
-                procstr += '    <process_info>\n'
-                procstr += '      <pid>%d</pid>\n' % p.pid
-                try:
-                    name = str(nvmlSystemGetProcessName(p.pid))
-                except NVMLError as err:
-                    if (err.value == NVML_ERROR_NOT_FOUND):
-                        # probably went away
-                        continue
-                    else:
-                        name = handleError(err)
-                procstr += '      <process_name>' + name + '</process_name>\n'
-                procstr += '      <used_memory>\n'
-                if (p.usedGpuMemory == None):
-                    procstr += 'N\A'
-                else:
-                    procstr += '%d MB\n' % (p.usedGpuMemory / 1024 / 1024)
-                procstr += '</used_memory>\n'
-                procstr += '    </process_info>\n'
-
-            strResult += procstr
-            strResult += '    </compute_processes>\n'
-            strResult += '  </gpu>\n'
-
-        strResult += '</nvidia_smi_log>\n'
-
-    except NVMLError as err:
-        strResult += 'nvidia_smi.py: ' + err.__str__() + '\n'
-
-    nvmlShutdown()
-
-    return strResult
