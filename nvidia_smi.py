@@ -59,35 +59,35 @@ from dicttoxml import dicttoxml
 # bitType: NVML_SINGLE_BIT_ECC, NVML_DOUBLE_BIT_ECC
 
 def DictGetEccByType(handle, counterType, bitType):
-    try:
-        count = str(nvmlDeviceGetTotalEccErrors(handle, bitType, counterType))
-    except NVMLError as err:
-        count = handleError(err)
+  try:
+    count = str(nvmlDeviceGetTotalEccErrors(handle, bitType, counterType))
+  except NVMLError as err:
+    count = handleError(err)
 
-    try:
-        detail = nvmlDeviceGetDetailedEccErrors(handle, bitType, counterType)
-        deviceMemory = str(detail.deviceMemory)
-        registerFile = str(detail.registerFile)
-        l1Cache = str(detail.l1Cache)
-        l2Cache = str(detail.l2Cache)
-    except NVMLError as err:
-        msg = handleError(err)
-        deviceMemory = msg
-        registerFile = msg
-        l1Cache = msg
-        l2Cache = msg
+  try:
+    detail = nvmlDeviceGetDetailedEccErrors(handle, bitType, counterType)
+    deviceMemory = str(detail.deviceMemory)
+    registerFile = str(detail.registerFile)
+    l1Cache = str(detail.l1Cache)
+    l2Cache = str(detail.l2Cache)
+  except NVMLError as err:
+    msg = handleError(err)
+    deviceMemory = msg
+    registerFile = msg
+    l1Cache = msg
+    l2Cache = msg
 
-    return {'device_memory': deviceMemory, 'register_file': registerFile, 'l1_cache': l1Cache, 'l2_cache': l2Cache, 'total': count }
+  return {'device_memory': deviceMemory, 'register_file': registerFile, 'l1_cache': l1Cache, 'l2_cache': l2Cache, 'total': count }
 
 
 #
 # Converts errors into string messages
 #
 def handleError(err):
-    if (err.value == NVML_ERROR_NOT_SUPPORTED):
-        return "N/A"
-    else:
-        return err.__str__()
+  if (err.value == NVML_ERROR_NOT_SUPPORTED):
+    return "N/A"
+  else:
+    return err.__str__()
 
 #######
 def JsonDeviceQuery():
@@ -454,4 +454,3 @@ def XmlDeviceQuery():
   xml = dicttoxml(d, custom_root='nvidia_smi_log', attr_type=False).decode('utf-8')
   dom = parseString(xml)
   return dom.toprettyxml(indent="  ")
-
