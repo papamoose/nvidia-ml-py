@@ -8,7 +8,7 @@ if version < '2.2.3':
     DistributionMetadata.download_url = None
 
 setup(name='nvidia-ml-py',
-      version='3.295.01',
+      version='3.295.02',
       description='Python Bindings for the NVIDIA Management Library',
       py_modules=['pynvml', 'nvidia_smi'],
       license="BSD",
