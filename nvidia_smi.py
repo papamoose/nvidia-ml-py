@@ -448,6 +448,7 @@ def XmlDeviceQuery():
   # We might have a problem with section as the xml uses an ID to identify them.
   #   strResult += '  <gpu id="%s">\n' % pciInfo.busId.decode('utf-8')
   # Our XML does <gpuN></gpuN> instead.
+  # TODO this needs more attention. It breaks sometimes.
 
   d = []
   d.append(JsonDeviceQuery())
