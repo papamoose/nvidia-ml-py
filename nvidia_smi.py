@@ -491,9 +491,12 @@ def JsonDeviceQuery():
 #######
 # This used to be the primary
 def XmlDeviceQuery():
+  # We might have a problem with section as the xml uses an ID to identify them.
+  #   strResult += '  <gpu id="%s">\n' % pciInfo.busId.decode('utf-8')
+  # Our XML does <gpuN></gpuN> instead.
+
   d = []
-  g = JsonDeviceQuery()
-  d.append(g)
+  d.append(JsonDeviceQuery())
   xml = dicttoxml(d, custom_root='nvidia_smi_log', attr_type=False).decode('utf-8')
   dom = parseString(xml)
   return dom.toprettyxml(indent="  ")
