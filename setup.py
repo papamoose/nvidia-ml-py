@@ -7,10 +7,12 @@ if version < '2.2.3':
     DistributionMetadata.classifiers = None
     DistributionMetadata.download_url = None
 
+# dicttoxml will overwrite offical dicttoxml if it exists
+
 setup(name='nvidia-ml-py',
       version='3.295.02',
       description='Python Bindings for the NVIDIA Management Library',
-      py_modules=['pynvml', 'nvidia_smi'],
+      py_modules=['pynvml', 'nvidia_smi', 'dicttoxml'],
       license="BSD",
       url="http://www.nvidia.com/",
       author="NVIDIA Corporation",
