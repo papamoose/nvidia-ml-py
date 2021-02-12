@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import nvidia_smi
 
-xml = nvidia_smi.XmlDeviceQuery())
+xml = nvidia_smi.XmlDeviceQuery()
 
-dict = nvidia_smi.JsonDeviceQuery())
+dict = nvidia_smi.JsonDeviceQuery()
