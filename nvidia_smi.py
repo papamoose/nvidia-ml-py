@@ -80,52 +80,6 @@ def DictGetEccByType(handle, counterType, bitType):
     return {'device_memory': deviceMemory, 'register_file': registerFile, 'l1_cache': l1Cache, 'l2_cache': l2Cache, 'total': count }
 
 
-def GetEccByType(handle, counterType, bitType):
-    try:
-        count = str(nvmlDeviceGetTotalEccErrors(handle, bitType, counterType))
-    except NVMLError as err:
-        count = handleError(err)
-
-    try:
-        detail = nvmlDeviceGetDetailedEccErrors(handle, bitType, counterType)
-        deviceMemory = str(detail.deviceMemory)
-        registerFile = str(detail.registerFile)
-        l1Cache = str(detail.l1Cache)
-        l2Cache = str(detail.l2Cache)
-    except NVMLError as err:
-        msg = handleError(err)
-        deviceMemory = msg
-        registerFile = msg
-        l1Cache = msg
-        l2Cache = msg
-    strResult = ''
-    strResult += '          <device_memory>' + deviceMemory + '</device_memory>\n'
-    strResult += '          <register_file>' + registerFile + '</register_file>\n'
-    strResult += '          <l1_cache>' + l1Cache + '</l1_cache>\n'
-    strResult += '          <l2_cache>' + l2Cache + '</l2_cache>\n'
-    strResult += '          <total>' + count + '</total>\n'
-    return strResult
-
-def GetEccByCounter(handle, counterType):
-    strResult = ''
-    strResult += '        <single_bit>\n'
-    strResult += str(GetEccByType(handle, counterType, NVML_SINGLE_BIT_ECC))
-    strResult += '        </single_bit>\n'
-    strResult += '        <double_bit>\n'
-    strResult += str(GetEccByType(handle, counterType, NVML_DOUBLE_BIT_ECC))
-    strResult += '        </double_bit>\n'
-    return strResult
-
-def GetEccStr(handle):
-    strResult = ''
-    strResult += '      <volatile>\n'
-    strResult += str(GetEccByCounter(handle, NVML_VOLATILE_ECC))
-    strResult += '      </volatile>\n'
-    strResult += '      <aggregate>\n'
-    strResult += str(GetEccByCounter(handle, NVML_AGGREGATE_ECC))
-    strResult += '      </aggregate>\n'
-    return strResult
-
 #
 # Converts errors into string messages
 #
